@@ -31,7 +31,7 @@ const Navigation = () => {
 
     const showGamesPage = title === "Game" ?
     <Link 
-        href="/games"
+        href={`/games?key=${localStorage.getItem("serverTokenKey")}`}
         passHref
       >
         <li 

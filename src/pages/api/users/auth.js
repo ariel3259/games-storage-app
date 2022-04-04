@@ -2,6 +2,7 @@ import con from "../db/connection";
 import UsersModel from "../models/UsersModel";
 import { Op } from "sequelize";
 import { genToken } from "../utils/tokens";
+import store from "store2";
 
 export default async function handler(req, res){
     
@@ -52,10 +53,15 @@ export default async function handler(req, res){
 
     const token = await genToken(subject);
     
+    const access_token = "access_token_"+subject;
+
+    store(access_token, token);
+
     res.json({
         message: `Welcome ${user.name} ${user.last_name}`,
         access_token: token,
-        subject: subject
+        subject,
+        serverTokenKey: access_token
     });
     
 }

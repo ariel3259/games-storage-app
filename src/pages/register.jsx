@@ -26,17 +26,20 @@ const Register = () => {
     const onChangeDni = (e) => dispatch(actionChangeDni(e.target.value));
     const onChangeEmail  = (e) => dispatch(actionChangeEmail(e.target.value));
     const onChangePassword = (e) => dispatch(actionChangePassword(e.target.value));
-    const onClickRegister = async () => await register(user, router);
+    const onSubmitRegister = async (event) => {
+        event.preventDefault();
+        await register(user, router);
+    }
 
     return(
         <TitleProvider 
             value="Register"
         >
             <Container>
-                <div 
-                    className="container m-4"
+                <form
+                    className="container p-4"
+                    onSubmit={onSubmitRegister}
                 >
-                
                     {/* Name */}
                     <TextField 
                         text="Name:" 
@@ -77,12 +80,11 @@ const Register = () => {
                         onChangeField={onChangePassword}
                     />
 
-                    <button 
-                        className="btn btn-primary btn-lg m-4" 
-                        onClick={onClickRegister}
-                    >
-                        Create account
-                    </button>
+                    <input 
+                        type="submit"
+                        value="Register"
+                        className="btn btn-primary btn-lg m-4"
+                    />
                     <Link 
                         href="/" 
                         passHref
@@ -93,7 +95,8 @@ const Register = () => {
                             Cancel
                         </button>
                     </Link>
-                </div>
+
+                </form>
             </Container>
         </TitleProvider>
     );

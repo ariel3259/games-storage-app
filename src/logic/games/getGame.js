@@ -1,12 +1,12 @@
 import Swal from "sweetalert2";
 
-export default async function getGame(id, router){
+export default async function getGame(id, router, token, subject){
 
-    const response = await fetch("/api/games/get_game", {
+    const response = await fetch("http://localhost:3000/api/games/get_game", {
         headers:{
             "Content-Type": "application/json",
-            "access_token": `${localStorage.getItem("access_token")}`,
-            "subject": `${localStorage.getItem("subject")}`,
+            "access_token": `${token}`,
+            "subject": `${subject}`,
             "id": id
         }
     });

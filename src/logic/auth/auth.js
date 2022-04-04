@@ -33,7 +33,8 @@ export default async function auth(user, redirect){
     //storages authentification data
     localStorage.setItem("subject", data.subject);
     localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("serverTokenKey", data.serverTokenKey);
 
     //Response
-    Swal.fire("Success", data.message, "success").then(() => redirect.push("/games"));
+    Swal.fire("Success", data.message, "success").then(() => redirect.push(`/games?key=${data.serverTokenKey}`));
 }   

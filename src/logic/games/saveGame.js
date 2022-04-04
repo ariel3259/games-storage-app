@@ -35,5 +35,5 @@ export default async function saveGame(game, refreshGame, router){
         timer: 1200
     });
 
-    await refreshGame(router);
+    await refreshGame();
 }

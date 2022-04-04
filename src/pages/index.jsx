@@ -15,17 +15,21 @@ export default function Index() {
   const router = useRouter();
 
   //on Change states
-  const onChangeEmail = (e) => dispatch(actionChangeEmail(e.target.value));
-  const onChangePassword = (e) => dispatch(actionChangePassword(e.target.value));
-  const onClickAuth = async () => await auth(user, router);  
+  const onChangeEmail = (event) => dispatch(actionChangeEmail(event.target.value));
+  const onChangePassword = (event) => dispatch(actionChangePassword(event.target.value));
+  const onSubmitAuth = async (event) => {
+    event.preventDefault();
+    await auth(user, router);
+  }
 
   return (
     <TitleProvider 
       value="Log in"
     >
       <Container>
-        <div 
-          className="container  p-4"
+        <form
+          className="Container p-4"
+          onSubmit={onSubmitAuth}
         >
           
           {/* Input Email */}
@@ -43,10 +47,11 @@ export default function Index() {
             value={user.password} 
             onChangeField={onChangePassword}
           />
-          
+
           <button 
             className="btn btn-primary btn-lg m-4" 
-            onClick={onClickAuth}
+            type="submit"
+            value="Submit"
           >
               Log in
           </button>
@@ -61,9 +66,15 @@ export default function Index() {
                 Register
             </button>
           </Link>
-          
-        </div>
+
+        </form>
       </Container>
     </TitleProvider>
   );
 }
+
+
+  
+
+  
+ 

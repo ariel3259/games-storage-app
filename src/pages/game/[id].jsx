@@ -1,4 +1,4 @@
-import React, {useEffect, useReducer, useState} from "react";
+import React, {useReducer} from "react";
 import Container from "../../components/Container";
 import { TitleProvider } from "../../context/TitleContext";
 import { useRouter } from "next/router";
@@ -9,7 +9,7 @@ import TextField from "../../components/TextField";
 import updateGame from "../../logic/games/updateGame";
 import deleteGame from "../../logic/games/deleteGame";
 
-const Game = () => {
+const Game = ({ defaultValue }) => {
 
     const [game, dispatch] = useReducer(GamesReducers, initialState);
     const router = useRouter();
@@ -26,20 +26,6 @@ const Game = () => {
     const onClickUpdate = async () => await updateGame(game, router);
     const onClickDelete = async () => await deleteGame(id, router);
 
-    useEffect(() => {
-
-        (async () => {
-            const gameFromBackSide = await getGame(id, router); 
-            dispatch(actionChangeId(gameFromBackSide.id))
-            dispatch(actionChangeName(gameFromBackSide.name));
-            dispatch(actionChangeDescription(gameFromBackSide.description));
-            dispatch(actionChangeYearRelease(gameFromBackSide.year_release));
-            dispatch(actionChangeGender(gameFromBackSide.gender));
-            dispatch(actionChangeBrand(gameFromBackSide.brand));
-            dispatch(actionChangePrice(gameFromBackSide.price));
-        })();
-
-    }, [id, dispatch, router]);
 
     return(
         <TitleProvider
@@ -51,7 +37,7 @@ const Game = () => {
                 <TextField 
                     text="Name:"
                     type="text"
-                    value={game.name}
+                    value={defaultValue.name}
                     onChangeField={onChangeName}
                 />
                 
@@ -59,7 +45,7 @@ const Game = () => {
                 <TextField 
                     text="Description:"
                     type="text"
-                    value={game.description}
+                    value={defaultValue.description}
                     onChangeField={onChangeDescription}
                 />
                 
@@ -67,7 +53,7 @@ const Game = () => {
                 <TextField 
                     text="Year Release:"
                     type="date"
-                    value={game.yearRelease}
+                    value={defaultValue.yearRelease}
                     onChangeField={onChangeYearRelease}
                 />
 
@@ -75,7 +61,7 @@ const Game = () => {
                 <TextField 
                     text="Gender:"
                     type="text"
-                    value={game.gender}
+                    value={defaultValue.gender}
                     onChangeField={onChangeGender}
                 />
 
@@ -83,15 +69,15 @@ const Game = () => {
                 <TextField 
                     text="Brand:"
                     type="text"
-                    value={game.brand}
+                    value={defaultValue.brand}
                     onChangeField={onChangeBrand}
                 />
 
                 {/* Price */}
                 <TextField 
-                    text={`Price: $${game.price}`}
+                    text={`Price: $${defaultValue.price}`}
                     type="number"
-                    value={0}
+                    value={defaultValue.price}
                     onChangeField={onChangePrice}
                 />
                 
@@ -116,3 +102,25 @@ const Game = () => {
 }
 
 export default Game;
+
+export async function getServerSideProps(context){
+
+    const store = require("store2");
+
+    const { key, id } = context.query;
+
+    console.log(key);
+    console.log(id);
+
+    const token = store(key);
+
+    const subject = key.replace("access_token_", "");
+
+    const data = await getGame(id, null, token, subject);
+
+    return {
+        props: {
+            defaultValue: data
+        }
+    }
+}

@@ -1,6 +1,6 @@
 import { TitleProvider } from "../context/TitleContext";
 import Container from "../components/Container";
-import { useState, useEffect, useReducer } from "react";
+import { useState, useReducer } from "react";
 import getGames from "../logic/games/getGames";
 import {actionChangeName, actionChangeDescription, actionChangeYearRelease, actionChangeGender, actionChangeBrand, actionChangePrice} from "../actions/GamesActions";
 import { initialState, GamesReducers } from "../reducers/GamesReducers";
@@ -10,15 +10,19 @@ import TextField from "../components/TextField";
 import saveGame from "../logic/games/saveGame";
 import { useRouter } from "next/router";
 
-const Games = () => {
+
+const Games = ({ data }) => {
     
     //states
-    const [games, setGames] = useState([]) ;
+    const [games, setGames] = useState(data) ;
     const [show, setShow] = useState(false);
     const [game, dispatch] = useReducer(GamesReducers, initialState);
     const router = useRouter();
 
+    const { key } = router.query;
+
     //onChange
+    const onChangeGame = async () => setGames(await getGames(router));
     const onChangeShow = () => setShow(!show);
     const onChangeName = (e) => dispatch(actionChangeName(e.target.value));
     const onChangeDescription = (e) => dispatch(actionChangeDescription(e.target.value));
@@ -26,34 +30,32 @@ const Games = () => {
     const onChangeGender = (e) => dispatch(actionChangeGender(e.target.value));
     const onChangeBrand = (e) => dispatch(actionChangeBrand(e.target.value));
     const onChangePrice = (e) => dispatch(actionChangePrice(e.target.value));
-    const onClickSave = async () => await saveGame(game, getGames, router);
+    const onSubmitSave = async (event) => {
+        event.preventDefault();
+        await saveGame(game, onChangeGame, router);
+    }
 
-    useEffect(() => {
-        (async () => {
-            const gamesFromDatabase = await getGames(router);
-            setGames(gamesFromDatabase?.map(game => {
-                return (
-                    <Link 
-                        key={game.id}
-                        href={`/game/${game.id}`}
-                        passHref
+
+    const listGames = games?.map(game => {
+        return (
+            <Link 
+                key={game.id}
+                href={`/game/${game.id}?key=${key}`}
+                passHref
+            >
+                <div 
+                    className="card col-md-5 m-2"
+                    style={{width: "18rem", height: "6rem"}}
+                >
+                    <div 
+                        className="card-body justify-self-center"
                     >
-                        <div 
-                            className="card col-md-5 m-2"
-                            style={{width: "18rem", height: "6rem"}}
-                        >
-                            <div 
-                                className="card-body justify-self-center"
-                            >
-                                <h3>{game.name}</h3>
-                            </div>
-                        </div>
-                    </Link>
-                )
-            }));
-        })();
-    }, [router]);
-
+                        <h3>{game.name}</h3>
+                    </div>
+                </div>
+            </Link>
+        )
+    });
 
 
     return(
@@ -70,15 +72,17 @@ const Games = () => {
                 <div 
                     className="row"
                 >
-                    {games}
+                    {listGames}
                 </div>
                 <ModalImp 
                     show={show}
                     HandleClose={onChangeShow}
                     body={
                         <>
-
-                            {/* Name */}
+                            <form
+                                onSubmit={onSubmitSave}
+                            >
+                                    {/* Name */}
                             <TextField 
                                 text="Name: "
                                 type="text"
@@ -125,17 +129,14 @@ const Games = () => {
                                 value={game.price}
                                 onChangeField={onChangePrice}
                             />
+                            
+                            <input 
+                                type="submit"
+                                className="btn btn-primary btn-lg"
+                                value="Save game"
+                            />
 
-                        </>
-                    }
-                    footer={
-                        <>
-                            <button 
-                                className="btn btn-primary"
-                                onClick={onClickSave}
-                            >
-                                Add Game                            
-                            </button>
+                            </form>
                         </>
                     }
                 />
@@ -145,3 +146,24 @@ const Games = () => {
 }
 
 export default Games;
+
+export async function getServerSideProps(context){
+
+    console.log("this is server side");
+
+    const store = require("store2");
+
+    const { key } = context.query;
+
+    const token = store(key);
+
+    const subject = key.replace("access_token_", "");
+
+    const data = await getGames(null, token, subject);
+
+    return {
+        props: {
+            data
+        }
+    };
+}
